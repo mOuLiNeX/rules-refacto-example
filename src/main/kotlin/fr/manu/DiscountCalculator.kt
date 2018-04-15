@@ -1,15 +1,13 @@
 package fr.manu
 
-private val rules = listOf<IDiscountRule>(
+private val rules = listOf(
         BirthdayDiscountRule(),
         SeniorDiscountRule(),
         NewCustomerRule(),
-        OneYearLoyalCustomerRule(),
-        FiveYearsLoyalCustomerRule(),
-        TenYearsLoyalCustomerRule()
+        OneYearLoyalCustomerRule().withDependantRule(LoyalCustomerBirthdayRule()),
+        FiveYearsLoyalCustomerRule().withDependantRule(LoyalCustomerBirthdayRule()),
+        TenYearsLoyalCustomerRule().withDependantRule(LoyalCustomerBirthdayRule())
 )
 
 fun calculateDiscount(customer: Customer) =
-        rules.fold(.0, operation = { discount, rule ->
-            Math.max(discount, rule.calculateCustomerDiscount(customer))
-        })
+        RulesDiscountEvaluator(rules).calculateCustomerDiscount(customer)

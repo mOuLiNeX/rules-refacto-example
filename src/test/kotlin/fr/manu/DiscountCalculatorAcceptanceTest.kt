@@ -80,7 +80,7 @@ class DiscountCalculatorAcceptanceTest {
     }
 
     @Test
-    fun `Pour tout achat à la date anniversaire d'un client connu depuis + d'1 an 10% de discount en +`() {
+    fun `Pour tout achat à la date anniversaire d'un client connu discount + 10%`() {
         whenever(client.isKnown).thenReturn(true)
         whenever(client.isBirthday).thenReturn(true)
 
