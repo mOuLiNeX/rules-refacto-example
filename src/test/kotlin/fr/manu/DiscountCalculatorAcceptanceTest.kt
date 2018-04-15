@@ -1,115 +1,111 @@
 package fr.manu
 
-import org.assertj.core.api.Assertions
+import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.whenever
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.Before
 import org.junit.Test
-import java.time.LocalDate.now
-import java.time.LocalDateTime
 
 class DiscountCalculatorAcceptanceTest {
+    private lateinit var client: Customer
+
+    @Before
+    fun setUp() {
+        client = mock()
+    }
+
     @Test
     fun `Pour tous les + de 65 ans discount de 5%`() {
         // GIVEN
-        val client = Customer(dateOfBirth = now().minusYears(66).minusMonths(2),
-                dateOfFirstPurchase = LocalDateTime.now().minusDays(1))
+        whenever(client.isSenior).thenReturn(true)
+        whenever(client.isKnown).thenReturn(true)
 
         // WHEN
         val discount = calculateDiscount(client)
 
         // THEN
-        Assertions.assertThat(discount).isEqualTo(.05)
+        assertThat(discount).isEqualTo(.05)
     }
 
     @Test
     fun `Pour l'anniversaire discount de 10%`() {
         // GIVEN
-        val client = Customer(dateOfBirth = now().minusYears(35),
-                dateOfFirstPurchase = LocalDateTime.now().minusDays(1))
+        whenever(client.isBirthday).thenReturn(true)
+        whenever(client.isKnown).thenReturn(true)
 
         // WHEN
         val discount = calculateDiscount(client)
 
         // THEN
-        Assertions.assertThat(discount).isEqualTo(.1)
+        assertThat(discount).isEqualTo(.1)
     }
 
     @Test
     fun `Pour un client connu depuis + d'1 an discount de 10%`() {
         // GIVEN
-        val client = Customer(
-                dateOfBirth = now().minusYears(35).minusMonths(4),
-                dateOfFirstPurchase = LocalDateTime.now().minusYears(1).minusDays(1))
+        whenever(client.isKnown).thenReturn(true)
+        whenever(client.hasBeenLoyalForYears(1)).thenReturn(true)
 
         // WHEN
         val discount = calculateDiscount(client)
 
         // THEN
-        Assertions.assertThat(discount).isEqualTo(.1)
+        assertThat(discount).isEqualTo(.1)
     }
 
     @Test
     fun `Pour un client connu depuis + de 5 ans discount de 12%`() {
         // GIVEN
-        val client = Customer(
-                dateOfBirth = now().minusYears(35).minusMonths(4),
-                dateOfFirstPurchase = LocalDateTime.now().minusYears(5).minusDays(1))
+        whenever(client.isKnown).thenReturn(true)
+        whenever(client.hasBeenLoyalForYears(5)).thenReturn(true)
 
         // WHEN
         val discount = calculateDiscount(client)
 
         // THEN
-        Assertions.assertThat(discount).isEqualTo(.12)
+        assertThat(discount).isEqualTo(.12)
     }
 
     @Test
     fun `Pour un client connu depuis + de 10 ans discount de 20%`() {
         // GIVEN
-        val client = Customer(
-                dateOfBirth = now().minusYears(35).minusMonths(4),
-                dateOfFirstPurchase = LocalDateTime.now().minusYears(10).minusDays(1))
+        whenever(client.isKnown).thenReturn(true)
+        whenever(client.hasBeenLoyalForYears(10)).thenReturn(true)
 
         // WHEN
         val discount = calculateDiscount(client)
 
         // THEN
-        Assertions.assertThat(discount).isEqualTo(.2)
+        assertThat(discount).isEqualTo(.2)
     }
 
     @Test
     fun `Pour tout achat à la date anniversaire d'un client connu depuis + d'1 an 10% de discount en +`() {
+        whenever(client.isKnown).thenReturn(true)
+        whenever(client.isBirthday).thenReturn(true)
+
         // Connu depuis + d'1 an
-        Assertions.assertThat(
-                calculateDiscount(
-                        Customer(
-                                dateOfBirth = now().minusYears(35),
-                                dateOfFirstPurchase = LocalDateTime.now().minusYears(1).minusDays(1)))
-        ).isEqualTo(.1 + .1)
+        whenever(client.hasBeenLoyalForYears(1)).thenReturn(true)
+        assertThat(calculateDiscount(client)).isEqualTo(.1 + .1)
 
         // Connu depuis + de 5 ans
-        Assertions.assertThat(
-                calculateDiscount(
-                        Customer(
-                                dateOfBirth = now().minusYears(35),
-                                dateOfFirstPurchase = LocalDateTime.now().minusYears(5).minusDays(1)))
-        ).isEqualTo(.12 + .1)
+        whenever(client.hasBeenLoyalForYears(5)).thenReturn(true)
+        assertThat(calculateDiscount(client)).isEqualTo(.12 + .1)
 
         // Connu depuis + d'10 ans
-        Assertions.assertThat(
-                calculateDiscount(
-                        Customer(
-                                dateOfBirth = now().minusYears(35),
-                                dateOfFirstPurchase = LocalDateTime.now().minusYears(10).minusDays(1)))
-        ).isEqualTo(.2 + .1)
+        whenever(client.hasBeenLoyalForYears(10)).thenReturn(true)
+        assertThat(calculateDiscount(client)).isEqualTo(.2 + .1)
     }
 
     @Test
     fun `Pour tout nveau client discount of 15%`() {
         // GIVEN
-        val client = Customer(dateOfBirth = now().minusYears(35).minusMonths(2).minusDays(1))
+        whenever(client.isKnown).thenReturn(false)
 
         // WHEN
         val discount = calculateDiscount(client)
 
         // THEN
-        Assertions.assertThat(discount).isEqualTo(.15)
+        assertThat(discount).isEqualTo(.15)
     }
 }
