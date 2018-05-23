@@ -1,29 +1,26 @@
 package fr.manu
 
-interface IDiscountRule {
-    fun calculateCustomerDiscount(customer: Customer): Double
-}
+import java.util.function.Function
+import java.util.function.Predicate
 
-class BirthdayDiscountRule : IDiscountRule {
-    override fun calculateCustomerDiscount(customer: Customer): Double = if (customer.isBirthday) 0.1 else .0
-}
+val birthdayDiscountRule = DiscountRule({ it.isBirthday }, { 0.1 })
 
-class NewCustomerRule : IDiscountRule {
-    override fun calculateCustomerDiscount(customer: Customer): Double = if (!customer.isKnown) 0.15 else .0
-}
+val newCustomerRule = DiscountRule({ !it.isKnown }, { 0.15 })
 
-class SeniorDiscountRule : IDiscountRule {
-    override fun calculateCustomerDiscount(customer: Customer): Double = if (customer.isSenior) 0.05 else .0
-}
+val seniorDiscountRule = DiscountRule({ it.isSenior }, { 0.05 })
 
-abstract class LoyalCustomerRule(private val yearsAsCustomer: Int, private val discount: Double) : IDiscountRule {
-    override fun calculateCustomerDiscount(customer: Customer): Double =
-            if (customer.hasBeenLoyalForYears(yearsAsCustomer)) {
-                // On réutilise la règle de l'anniversaire plutôt que de dupliquer le code
-                discount + BirthdayDiscountRule().calculateCustomerDiscount(customer)
-            } else .0
-}
+private fun loyalCustomerMatcher(yearsAsCustomer: Int): Predicate<Customer> = Predicate { it.hasBeenLoyalForYears(yearsAsCustomer) }
+private fun loyalCustomerTransformer(discount: Double): Function<Customer, Double> = Function { discount }
 
-class OneYearLoyalCustomerRule() : LoyalCustomerRule(1, 0.1)
-class FiveYearsLoyalCustomerRule() : LoyalCustomerRule(5, 0.12)
-class TenYearsLoyalCustomerRule() : LoyalCustomerRule(10, 0.2)
+val oneYearLoyalCustomerRule = DiscountRule(loyalCustomerMatcher(1), loyalCustomerTransformer(0.1))
+val fiveYearsLoyalCustomerRule = DiscountRule(loyalCustomerMatcher(5), loyalCustomerTransformer(0.12))
+val tenYearsLoyalCustomerRule = DiscountRule(loyalCustomerMatcher(10), loyalCustomerTransformer(0.2))
+
+// Composition of predicate/function with Java8 ;-)
+fun loyalCustomerBirthdayRule(loyalCustomerRule: DiscountRule) = DiscountRule(
+        matcher = loyalCustomerRule.matcher.and(birthdayDiscountRule.matcher),
+        transformer = loyalCustomerRule.transformer.andThen { discount: Double -> discount + 0.1 })
+
+val oneYearLoyalCustomerBirthdayRule = loyalCustomerBirthdayRule(oneYearLoyalCustomerRule)
+val fiveYearsLoyalCustomerBirthdayRule = loyalCustomerBirthdayRule(fiveYearsLoyalCustomerRule)
+val tenYearsLoyalCustomerBirthdayRule = loyalCustomerBirthdayRule(tenYearsLoyalCustomerRule)

@@ -1,10 +1,13 @@
 package fr.manu
 
+import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.junit.Before
 import org.junit.Test
+import java.lang.Math.random
 
 class RulesTest {
     private lateinit var client: Customer
@@ -20,10 +23,10 @@ class RulesTest {
         whenever(client.isBirthday).thenReturn(true)
 
         // WHEN
-        val discount = BirthdayDiscountRule().calculateCustomerDiscount(client)
+        val discount = RulesDiscountEvaluator(birthdayDiscountRule).calculateCustomerDiscount(client)
 
         // THEN
-        Assertions.assertThat(discount).isEqualTo(.1)
+        assertThat(discount).isEqualTo(.1)
     }
 
     @Test
@@ -32,10 +35,10 @@ class RulesTest {
         whenever(client.isBirthday).thenReturn(false)
 
         // WHEN
-        val discount = BirthdayDiscountRule().calculateCustomerDiscount(client)
+        val discount = RulesDiscountEvaluator(birthdayDiscountRule).calculateCustomerDiscount(client)
 
         // THEN
-        Assertions.assertThat(discount).isEqualTo(.0)
+        assertThat(discount).isEqualTo(.0)
     }
 
     @Test
@@ -44,10 +47,10 @@ class RulesTest {
         whenever(client.isSenior).thenReturn(true)
 
         // WHEN
-        val discount = SeniorDiscountRule().calculateCustomerDiscount(client)
+        val discount = RulesDiscountEvaluator(seniorDiscountRule).calculateCustomerDiscount(client)
 
         // THEN
-        Assertions.assertThat(discount).isEqualTo(.05)
+        assertThat(discount).isEqualTo(.05)
     }
 
     @Test
@@ -56,10 +59,10 @@ class RulesTest {
         whenever(client.isSenior).thenReturn(false)
 
         // WHEN
-        val discount = SeniorDiscountRule().calculateCustomerDiscount(client)
+        val discount = RulesDiscountEvaluator(seniorDiscountRule).calculateCustomerDiscount(client)
 
         // THEN
-        Assertions.assertThat(discount).isEqualTo(.0)
+        assertThat(discount).isEqualTo(.0)
     }
 
     @Test
@@ -68,10 +71,10 @@ class RulesTest {
         whenever(client.isKnown).thenReturn(false)
 
         // WHEN
-        val discount = NewCustomerRule().calculateCustomerDiscount(client)
+        val discount = RulesDiscountEvaluator(newCustomerRule).calculateCustomerDiscount(client)
 
         // THEN
-        Assertions.assertThat(discount).isEqualTo(.15)
+        assertThat(discount).isEqualTo(.15)
     }
 
     @Test
@@ -80,10 +83,10 @@ class RulesTest {
         whenever(client.isKnown).thenReturn(true)
 
         // WHEN
-        val discount = NewCustomerRule().calculateCustomerDiscount(client)
+        val discount = RulesDiscountEvaluator(newCustomerRule).calculateCustomerDiscount(client)
 
         // THEN
-        Assertions.assertThat(discount).isEqualTo(.0)
+        assertThat(discount).isEqualTo(.0)
     }
 
     @Test
@@ -92,10 +95,10 @@ class RulesTest {
         whenever(client.hasBeenLoyalForYears(1)).thenReturn(true)
 
         // WHEN
-        val discount = OneYearLoyalCustomerRule().calculateCustomerDiscount(client)
+        val discount = RulesDiscountEvaluator(oneYearLoyalCustomerRule).calculateCustomerDiscount(client)
 
         // THEN
-        Assertions.assertThat(discount).isEqualTo(.1)
+        assertThat(discount).isEqualTo(.1)
     }
 
     @Test
@@ -104,10 +107,10 @@ class RulesTest {
         whenever(client.hasBeenLoyalForYears(1)).thenReturn(false)
 
         // WHEN
-        val discount = OneYearLoyalCustomerRule().calculateCustomerDiscount(client)
+        val discount = RulesDiscountEvaluator(oneYearLoyalCustomerRule).calculateCustomerDiscount(client)
 
         // THEN
-        Assertions.assertThat(discount).isEqualTo(.0)
+        assertThat(discount).isEqualTo(.0)
     }
 
     @Test
@@ -116,10 +119,10 @@ class RulesTest {
         whenever(client.hasBeenLoyalForYears(5)).thenReturn(true)
 
         // WHEN
-        val discount = FiveYearsLoyalCustomerRule().calculateCustomerDiscount(client)
+        val discount = RulesDiscountEvaluator(fiveYearsLoyalCustomerRule).calculateCustomerDiscount(client)
 
         // THEN
-        Assertions.assertThat(discount).isEqualTo(.12)
+        assertThat(discount).isEqualTo(.12)
     }
 
     @Test
@@ -128,10 +131,10 @@ class RulesTest {
         whenever(client.hasBeenLoyalForYears(5)).thenReturn(false)
 
         // WHEN
-        val discount = FiveYearsLoyalCustomerRule().calculateCustomerDiscount(client)
+        val discount = RulesDiscountEvaluator(fiveYearsLoyalCustomerRule).calculateCustomerDiscount(client)
 
         // THEN
-        Assertions.assertThat(discount).isEqualTo(.0)
+        assertThat(discount).isEqualTo(.0)
     }
 
     @Test
@@ -140,10 +143,10 @@ class RulesTest {
         whenever(client.hasBeenLoyalForYears(10)).thenReturn(true)
 
         // WHEN
-        val discount = TenYearsLoyalCustomerRule().calculateCustomerDiscount(client)
+        val discount = RulesDiscountEvaluator(tenYearsLoyalCustomerRule).calculateCustomerDiscount(client)
 
         // THEN
-        Assertions.assertThat(discount).isEqualTo(.2)
+        assertThat(discount).isEqualTo(.2)
     }
 
     @Test
@@ -152,9 +155,40 @@ class RulesTest {
         whenever(client.hasBeenLoyalForYears(10)).thenReturn(false)
 
         // WHEN
-        val discount = TenYearsLoyalCustomerRule().calculateCustomerDiscount(client)
+        val discount = RulesDiscountEvaluator(tenYearsLoyalCustomerRule).calculateCustomerDiscount(client)
 
         // THEN
-        Assertions.assertThat(discount).isEqualTo(.0)
+        assertThat(discount).isEqualTo(.0)
+    }
+
+
+    @Test
+    fun applyLoyalCustomerBirthdayRule() {
+        // GIVEN
+        whenever(client.isBirthday).thenReturn(true)
+        whenever(client.hasBeenLoyalForYears(any<Int>())).thenReturn(true)
+        val discount = random()
+
+        // WHEN
+        val rule = loyalCustomerBirthdayRule(DiscountRule({ client.hasBeenLoyalForYears(3) }, { discount }))
+
+        // THEN
+        assertThat(rule.match(client)).isTrue()
+        assertThat(rule.calculateCustomerDiscount(client) - discount)
+                .isCloseTo(.1, within(.0000001)) // Floating point
+    }
+
+    @Test
+    fun dontApplyLoyalCustomerBirthdayRule() {
+        // GIVEN
+        whenever(client.isBirthday).thenReturn(false)
+        whenever(client.hasBeenLoyalForYears(any<Int>())).thenReturn(true)
+        val discount = random()
+
+        // WHEN
+        val rule = loyalCustomerBirthdayRule(DiscountRule({ client.hasBeenLoyalForYears(3) }, { discount }))
+
+        // THEN
+        assertThat(rule.match(client)).isFalse()
     }
 }
