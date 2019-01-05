@@ -1,8 +1,8 @@
 package fr.manu
 
-import com.nhaarman.mockito_kotlin.any
-import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.whenever
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.Before
@@ -166,7 +166,7 @@ class RulesTest {
     fun applyLoyalCustomerBirthdayRule() {
         // GIVEN
         whenever(client.isBirthday).thenReturn(true)
-        whenever(client.hasBeenLoyalForYears(any<Int>())).thenReturn(true)
+        whenever(client.hasBeenLoyalForYears(any())).thenReturn(true)
         val discount = random()
 
         // WHEN
@@ -182,7 +182,7 @@ class RulesTest {
     fun dontApplyLoyalCustomerBirthdayRule() {
         // GIVEN
         whenever(client.isBirthday).thenReturn(false)
-        whenever(client.hasBeenLoyalForYears(any<Int>())).thenReturn(true)
+        whenever(client.hasBeenLoyalForYears(any())).thenReturn(true)
         val discount = random()
 
         // WHEN

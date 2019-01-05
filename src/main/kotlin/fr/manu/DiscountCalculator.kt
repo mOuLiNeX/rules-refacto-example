@@ -1,6 +1,6 @@
 package fr.manu
 
-private val rules = listOf<DiscountRule>(
+private val rules = listOf(
         birthdayDiscountRule,
         seniorDiscountRule,
         newCustomerRule,
