@@ -18,6 +18,11 @@ group 'fr.manu'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'kotlin'
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion = "0.8.4"
+}
 
 repositories {
     jcenter()
@@ -37,4 +42,11 @@ compileKotlin {
 }
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        csv.enabled false
+    }
 }
