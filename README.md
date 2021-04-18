@@ -9,4 +9,4 @@ Développement avec un moteur de règles (Rules Design Pattern) (avec toujours p
 * Plus compréhensible que la composition des règles expérimentée sur la branche `rulesEnhanced`
 
 **Critiques :**
-* Le déboguage reste un peu délicat (le plus efficace reste un point d'arrêt à chaque étape des *folds*).  
+* Le débogage reste un peu délicat (le plus efficace reste un point d'arrêt à chaque étape des *folds*).  
